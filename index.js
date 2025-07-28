@@ -27,21 +27,35 @@ app.get('/api/users', (req, res) => {
 })
 
 app.post('/api/users/:_id/exercises', (req, res) => {
-  const userId = req.params._id
-  const { description, duration, date } = req.body
-  const user = users.find(u => u._id === userId)
+  const userId = req.params._id;
+  const { description, duration, date } = req.body;
+  const user = users.find(u => u._id === userId);
+  
   if (!user) {
-    return res.status(404).json({ error: 'User not found' })
+    return res.status(404).json({ error: 'User not found' });
   }
-  const newExercise = {
+
+  const parsedDate = date ? new Date(date) : new Date();
+  const formattedDate = parsedDate.toDateString(); // formato requerido
+
+  const exercise = {
     description,
-    duration,
-    date: date ? new Date(date) : new Date()
-  }
-  user.exercises = user.exercises || []
-  user.exercises.push(newExercise)
-  res.json(user)
-})
+    duration: parseInt(duration),
+    date: formattedDate
+  };
+
+  user.exercises = user.exercises || [];
+  user.exercises.push(exercise);
+
+  res.json({
+    _id: user._id,
+    username: user.username,
+    description: exercise.description,
+    duration: exercise.duration,
+    date: exercise.date
+  });
+});
+
 
 app.get('/api/users/:_id/logs', (req, res) => {
   const userId = req.params._id
