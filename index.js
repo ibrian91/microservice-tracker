@@ -58,24 +58,39 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 
 
 app.get('/api/users/:_id/logs', (req, res) => {
-  const userId = req.params._id
-  const user = users.find(u => u._id === userId)
+  const userId = req.params._id;
+  const user = users.find(u => u._id === userId);
+
   if (!user) {
-    return res.status(404).json({ error: 'User not found' })
+    return res.status(404).json({ error: 'User not found' });
   }
-  const { from, to, limit } = req.query
-  let logs = user.exercises || []
+
+  const { from, to, limit } = req.query;
+
+  let logs = user.exercises || [];
+
   if (from) {
-    logs = logs.filter(log => log.date >= new Date(from))
+    const fromDate = new Date(from);
+    logs = logs.filter(log => new Date(log.date) >= fromDate);
   }
+
   if (to) {
-    logs = logs.filter(log => log.date <= new Date(to))
+    const toDate = new Date(to);
+    logs = logs.filter(log => new Date(log.date) <= toDate);
   }
+
   if (limit) {
-    logs = logs.slice(0, limit)
+    logs = logs.slice(0, parseInt(limit));
   }
-  res.json({ _id: userId, username: user.username, count: logs.length, log: logs })
-})
+
+  res.json({
+    _id: user._id,
+    username: user.username,
+    count: logs.length,
+    log: logs
+  });
+});
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
